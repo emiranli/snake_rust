@@ -1,4 +1,3 @@
-use std::sync::{Arc, Mutex};
 use rand::random_range;
 use crate::app::{Cords, Direction, MAP_HEIGHT, MAP_WIDTH};
 

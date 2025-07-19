@@ -1,4 +1,4 @@
-use crossterm::event::{poll, read, KeyCode};
+use crossterm::event::poll;
 use std::{io, time};
 
 use untitled::app::SPEED;
