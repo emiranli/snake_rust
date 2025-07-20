@@ -26,5 +26,11 @@ impl Direction {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct Cords (i32, i32);
+
+impl Cords {
+    pub fn is_within_bounds(&self) -> bool {
+        self.0 >= 0 && self.0 < MAP_HEIGHT && self.1 >= 0 && self.1 < MAP_WIDTH
+    }
+}

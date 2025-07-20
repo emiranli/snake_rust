@@ -21,9 +21,9 @@ fn clear_console() {
     print!("{esc}c", esc = 27 as char); // отчитска вывода
 }
 
-pub fn lose_message(game: &Game) {
+pub fn lose_message(game: &Game, message: &str) {
     clear_console();
-    println!("Game lost\r\nYou score: {}", game.get_score());
+    println!("Игра окончена: {message}\r\nСчёт: {}", game.get_score());
 }
 
 pub fn render_map(game: &Game) {

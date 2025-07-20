@@ -4,7 +4,7 @@ use crate::app::Direction;
 use crate::app::game::Game;
 
 pub fn match_event(game: &mut Game) -> io::Result<()> {
-    let event = read().expect("err read key");
+    let event = read()?;
     if let Some(key) = event.as_key_press_event() {
         let new_direction = match key.code {
             KeyCode::Char('w') => Some(Direction::Up),

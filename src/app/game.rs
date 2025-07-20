@@ -1,5 +1,32 @@
+use std::{fmt, io};
 use rand::random_range;
 use crate::app::{Cords, Direction, MAP_HEIGHT, MAP_WIDTH};
+
+#[derive(Debug)]
+pub enum GameError {
+    CollisionWithWall,
+    CollisionWithSelf,
+    UnknownError,
+}
+
+impl fmt::Display for GameError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            GameError::CollisionWithWall => write!(f, "Змейка врезалась в стену!"),
+            GameError::CollisionWithSelf => write!(f, "Змейка врезалась в себя!"),
+            GameError::UnknownError => write!(f, "Непредвиденная ошибка!"),
+        }
+    }
+}
+
+impl std::error::Error for GameError {}
+
+impl From<GameError> for io::Error {
+    fn from(error: GameError) -> Self {
+        io::Error::new(io::ErrorKind::Other, error.to_string())
+    }
+}
+
 
 pub struct Game {
     pub direction: Direction,
@@ -27,17 +54,17 @@ impl Game {
         game.food = game.next_food_position();
         game
     }
-    
-    pub fn get_snake_position(&self) -> &Vec<Cords>{
+
+    pub fn get_snake_position(&self) -> &Vec<Cords> {
         &self.snake
     }
     
-    pub fn get_food_position(&self) -> &Cords{
-        &self.food
+    pub fn get_food_position(&self) -> Cords {
+        self.food
     }
     
-    pub fn get_score(&self) -> &i32 {
-        &self.score
+    pub fn get_score(&self) -> i32 {
+        self.score
     }
     
     fn next_food_position(&mut self) -> Cords {
@@ -50,8 +77,11 @@ impl Game {
         Cords(x, y)
     }
 
-    pub fn move_snake(&mut self) -> Result<(), &'static str> {
-        let head = self.snake.first().expect("Error getting head");
+    pub fn move_snake(&mut self) -> Result<(), io::Error> {
+        let head = match self.snake.first() {
+            Some(head) => head,
+            None => return Err(io::Error::from(GameError::UnknownError)),
+        };
 
         let (ox, oy) =  self.direction.get_offset();
 
@@ -60,10 +90,12 @@ impl Game {
             head.1 + oy,
         );
 
-        if new_head.0 < 0 || new_head.0 == MAP_HEIGHT
-            || new_head.1 < 0 || new_head.1 == MAP_WIDTH
-            || self.snake.contains(&new_head) {
-            return Err("Error moving game");
+        if !new_head.is_within_bounds()  {
+            return Err(io::Error::from(GameError::CollisionWithWall));
+
+        }
+        if self.snake.contains(&new_head)  {
+            return Err(io::Error::from(GameError::CollisionWithSelf));
         }
 
         self.snake.insert(0, new_head);
